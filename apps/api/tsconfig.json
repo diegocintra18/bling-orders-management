@@ -2,16 +2,15 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "commonjs",
-    "moduleResolution": "node16",
+    "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"],
-      "@bling-orders/core": ["../../packages/core/src/index.ts"],
-      "@bling-orders/core/*": ["../../packages/core/src/*"],
-      "@bling-orders/infra": ["../../packages/infra/src/index.ts"],
-      "@bling-orders/infra/*": ["../../packages/infra/src/*"]
+      "@bling-orders/core": ["../../node_modules/@bling-orders/core"],
+      "@bling-orders/core/*": ["../../node_modules/@bling-orders/core/*"],
+      "@bling-orders/infra": ["../../node_modules/@bling-orders/infra"],
+      "@bling-orders/infra/*": ["../../node_modules/@bling-orders/infra/*"]
     },
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

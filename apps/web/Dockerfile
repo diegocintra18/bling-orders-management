@@ -1,35 +1,19 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine
 
-FROM base AS deps
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-RUN npm ci --legacy-peer-deps
+COPY package*.json ./
+COPY packages/*/package*.json ./packages/
+COPY apps/web/package*.json ./apps/web/
 
-FROM base AS builder
-WORKDIR /app
+RUN npm install --legacy-peer-deps --omit=dev
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+COPY packages/core/dist ./node_modules/@bling-orders/core
 
-RUN npx turbo run build --filter=@bling-orders/web
+COPY apps/web ./
 
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV=development
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/apps/web ./
-COPY --from=builder /app/node_modules ./node_modules
-
-RUN chown -R nextjs:nodejs /app
-
-USER nextjs
+RUN npm run build --workspace=apps/web
 
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start", "--workspace=apps/web"]

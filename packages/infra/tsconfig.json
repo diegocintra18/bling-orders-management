@@ -2,7 +2,14 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "axios": ["node_modules/axios"],
+      "mongoose": ["node_modules/mongoose"],
+      "bcryptjs": ["node_modules/bcryptjs"],
+      "jsonwebtoken": ["node_modules/jsonwebtoken"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

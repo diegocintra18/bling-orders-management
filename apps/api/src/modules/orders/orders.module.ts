@@ -13,6 +13,6 @@ import { AccountsModule } from '../accounts/accounts.module';
   ],
   controllers: [OrdersController],
   providers: [OrdersService, OrdersRepository],
-  exports: [OrdersService, OrdersRepository],
+  exports: [OrdersService, OrdersRepository, MongooseModule],
 })
 export class OrdersModule {}

@@ -45,13 +45,13 @@ export class Order {
   @Prop({ required: true })
   dataEmissao: Date;
 
-  @Prop({ type: Date })
+  @Prop({ type: Date, default: null })
   dataPrevista: Date | null;
 
-  @Prop({ type: Date })
+  @Prop({ type: Date, default: null })
   dataDespacho: Date | null;
 
-  @Prop()
+  @Prop({ type: String, default: null })
   trackingCode: string | null;
 
   @Prop({ type: String, enum: ['synced', 'pending', 'error'], default: 'pending' })

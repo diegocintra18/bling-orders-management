@@ -11,7 +11,8 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { StoresService } from './stores.service';
-import type { CreateStoreDto, UpdateStoreDto } from './dto/store.dto';
+import type { UpdateStoreDto } from './dto/store.dto';
+import { Request as ExpressRequest } from 'express';
 
 @Controller('stores')
 @UseGuards(AuthGuard('jwt'))
@@ -29,8 +30,9 @@ export class StoresController {
   }
 
   @Post()
-  async create(@Body() dto: CreateStoreDto, @Request() req: { user: { sub: string } }) {
-    return this.storesService.create(dto, req.user.sub);
+  async create(@Body() body: any, @Request() req: ExpressRequest & { user: { sub: string } }) {
+    const name = body?.Name || body?.name;
+    return this.storesService.create({ name }, req.user?.sub || 'unknown');
   }
 
   @Put(':id')

@@ -1,19 +1,15 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache python3 make g++
-
 WORKDIR /app
 
-COPY package*.json ./
-COPY packages/*/package.json ./packages/
-COPY apps/*/package.json ./apps/
+COPY apps/api/package*.json ./
 
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps --omit=dev
 
-COPY . .
-
-RUN node apps/api/scripts/build.js
+COPY apps/api/dist ./dist
+COPY packages/infra/dist ./node_modules/@bling-orders/infra
+COPY packages/core/dist ./node_modules/@bling-orders/core
 
 EXPOSE 3001
 
-CMD ["node", "apps/api/dist/main"]
+CMD ["node", "dist/main"]

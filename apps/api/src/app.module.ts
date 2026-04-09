@@ -4,6 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './modules/auth/auth.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
+import { StoresModule } from './modules/stores/stores.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { TrackingModule } from './modules/tracking/tracking.module';
@@ -28,6 +29,7 @@ import { SeedModule } from './modules/seed/seed.module';
     SeedModule,
     AuthModule,
     AccountsModule,
+    StoresModule,
     OrdersModule,
     WebhooksModule,
     TrackingModule,
