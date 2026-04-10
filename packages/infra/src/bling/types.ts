@@ -7,7 +7,7 @@ export interface IBlingClient {
 export interface BlingOrderResponse {
   id: number;
   numero: string;
-  situacao: string;
+  situacao: BlingSituacao;
   cliente: {
     nome: string;
     telefone?: string | null;
@@ -24,6 +24,30 @@ export interface BlingOrderResponse {
   dataPrevista?: string | undefined;
   dataSaida?: string | undefined;
   codigosRastreamento?: string[] | undefined;
+  notaFiscal?: BlingNotaFiscal | null;
+  loja?: BlingLoja | null;
+}
+
+export interface BlingSituacao {
+  id: number;
+  nome?: string;
+  valor?: number;
+}
+
+export interface BlingNotaFiscal {
+  numero: string;
+  serie: string;
+  chaveAcesso?: string;
+  dataEmissao?: string;
+}
+
+export interface BlingLoja {
+  id: number;
+  descricao?: string;
+  unidadeNegocio?: {
+    id: number;
+    descricao?: string;
+  };
 }
 
 export interface BlingOrdersParams {
@@ -31,9 +55,14 @@ export interface BlingOrdersParams {
     inicio: string;
     fim: string;
   };
-  situacao?: number;
+  dataAlteracao?: {
+    inicio: string;
+    fim: string;
+  };
+  idsSituacoes?: number[];
   pagina?: number;
   limite?: number;
+  idLoja?: number;
 }
 
 export interface BlingOrdersResponse {
@@ -44,4 +73,6 @@ export interface BlingOrdersResponse {
 
 export interface BlingWebhookPayload {
   id: number | string;
+  tipo: string;
+  data?: string;
 }

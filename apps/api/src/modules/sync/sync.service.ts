@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AccountDocument } from '../../common/schemas';
 import { BlingSyncService } from './bling-sync.service';
+import { BlingOAuthService } from '../auth/bling-oauth.service';
 
 @Injectable()
 export class SyncService {
@@ -12,6 +13,7 @@ export class SyncService {
   constructor(
     @InjectModel('Account') private readonly accountModel: Model<AccountDocument>,
     private readonly blingSyncService: BlingSyncService,
+    private readonly blingOAuthService: BlingOAuthService,
   ) {}
 
   @Cron('*/15 * * * *')
@@ -44,8 +46,18 @@ export class SyncService {
       accountId: account._id.toString(),
     });
 
+    let accessToken: string;
+
+    if (account.authType === 'oauth' && account.accessToken) {
+      accessToken = await this.blingOAuthService.getValidAccessToken(account._id.toString());
+    } else if (account.apiKey) {
+      accessToken = account.apiKey;
+    } else {
+      throw new Error(`Account ${account._id.toString()} has no valid authentication`);
+    }
+
     await this.blingSyncService.syncAccountOrders(
-      account.apiKey,
+      accessToken,
       account._id.toString(),
       account.storeId,
     );

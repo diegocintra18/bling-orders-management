@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { SyncService } from './sync.service';
 import { AccountsModule } from '../accounts/accounts.module';
 import { OrdersModule } from '../orders/orders.module';
+import { AuthModule } from '../auth/auth.module';
 import { BlingSyncService } from './bling-sync.service';
 import { OrderSchema, AccountSchema } from '../../common/schemas';
 import { createBlingClient } from '@bling-orders/infra';
@@ -15,6 +16,7 @@ import { createBlingClient } from '@bling-orders/infra';
     ]),
     AccountsModule,
     OrdersModule,
+    AuthModule,
   ],
   providers: [
     SyncService,

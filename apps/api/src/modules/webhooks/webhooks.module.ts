@@ -4,9 +4,10 @@ import { WebhooksService } from './webhooks.service';
 import { CreateOrderFromWebhookService } from './services/create-order-from-webhook.service';
 import { OrdersModule } from '../orders/orders.module';
 import { AccountsModule } from '../accounts/accounts.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [OrdersModule, AccountsModule],
+  imports: [OrdersModule, AccountsModule, AuthModule],
   controllers: [WebhooksController],
   providers: [WebhooksService, CreateOrderFromWebhookService],
 })

@@ -48,6 +48,11 @@ export class AccountsRepository {
       webhookToken: doc.webhookToken,
       storeId: doc.storeId,
       isActive: doc.isActive,
+      accessToken: doc.accessToken,
+      refreshToken: doc.refreshToken,
+      tokenExpiresAt: doc.tokenExpiresAt,
+      blingCompanyId: doc.blingCompanyId,
+      authType: doc.authType as 'api_key' | 'oauth',
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     };

@@ -144,6 +144,11 @@ export class OrdersRepository implements IOrderRepository {
       dataDespacho: doc.dataDespacho,
       trackingCode: doc.trackingCode,
       syncStatus: doc.syncStatus as OrderEntity['syncStatus'],
+      dataFaturamento: doc.dataFaturamento,
+      dataEmbalamento: doc.dataEmbalamento,
+      dataUltimaAtualizacaoStatus: doc.dataUltimaAtualizacaoStatus,
+      notaFiscal: doc.notaFiscal,
+      blingSituacaoOriginal: doc.blingSituacaoOriginal,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     };

@@ -4,8 +4,11 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { BlingOAuthController } from './bling-oauth.controller';
+import { BlingOAuthService } from './bling-oauth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
+import { AccountsModule } from '../accounts/accounts.module';
 
 @Module({
   imports: [
@@ -21,9 +24,10 @@ import { UsersModule } from '../users/users.module';
       }),
     }),
     UsersModule,
+    AccountsModule,
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService],
+  controllers: [AuthController, BlingOAuthController],
+  providers: [AuthService, BlingOAuthService, JwtStrategy],
+  exports: [AuthService, BlingOAuthService],
 })
 export class AuthModule {}

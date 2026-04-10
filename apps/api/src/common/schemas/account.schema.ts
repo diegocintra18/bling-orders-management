@@ -6,8 +6,8 @@ export class Account {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
-  apiKey: string;
+  @Prop({ type: String, default: null })
+  apiKey: string | null;
 
   @Prop({ required: true })
   webhookToken: string;
@@ -17,6 +17,21 @@ export class Account {
 
   @Prop({ default: true })
   isActive: boolean;
+
+  @Prop({ type: String, default: null })
+  accessToken: string | null;
+
+  @Prop({ type: String, default: null })
+  refreshToken: string | null;
+
+  @Prop({ type: Date, default: null })
+  tokenExpiresAt: Date | null;
+
+  @Prop({ type: Number, default: null })
+  blingCompanyId: number | null;
+
+  @Prop({ type: String, enum: ['api_key', 'oauth'], default: 'api_key' })
+  authType: string;
 
   createdAt: Date;
   updatedAt: Date;

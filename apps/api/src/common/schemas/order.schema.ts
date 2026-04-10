@@ -15,7 +15,7 @@ export class Order {
   @Prop({ required: true })
   numero: string;
 
-  @Prop({ type: String, enum: ['pendente', 'pago', 'separado', 'despachado', 'entregue'], default: 'pendente' })
+  @Prop({ type: String, enum: ['pendente', 'pago', 'faturado', 'embalado', 'separado', 'despachado', 'entregue'], default: 'pendente' })
   status: string;
 
   @Prop({ default: false })
@@ -57,6 +57,29 @@ export class Order {
   @Prop({ type: String, enum: ['synced', 'pending', 'error'], default: 'pending' })
   syncStatus: string;
 
+  @Prop({ type: Date, default: null })
+  dataFaturamento: Date | null;
+
+  @Prop({ type: Date, default: null })
+  dataEmbalamento: Date | null;
+
+  @Prop({ type: Date, default: null })
+  dataUltimaAtualizacaoStatus: Date | null;
+
+  @Prop({ type: Object, default: null })
+  notaFiscal: {
+    numero: string;
+    serie: string;
+    chaveAcesso?: string | null;
+    dataEmissao?: string | null;
+  } | null;
+
+  @Prop({ type: Object, default: null })
+  blingSituacaoOriginal: {
+    id: number;
+    nome: string;
+  } | null;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,3 +91,5 @@ export const OrderSchema = SchemaFactory.createForClass(Order);
 OrderSchema.index({ accountId: 1, externalOrderId: 1 }, { unique: true });
 OrderSchema.index({ storeId: 1, status: 1 });
 OrderSchema.index({ isDelayed: 1, isPicked: 1 });
+OrderSchema.index({ dataFaturamento: 1 });
+OrderSchema.index({ dataEmbalamento: 1 });

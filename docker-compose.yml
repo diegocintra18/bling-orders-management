@@ -39,6 +39,10 @@ services:
       JWT_REFRESH_EXPIRES_IN: 7d
       DELAY_THRESHOLD_HOURS: 24
       CORS_ORIGIN: http://localhost:3000
+      FRONTEND_URL: http://localhost:3000
+      BLING_CLIENT_ID: ${BLING_CLIENT_ID}
+      BLING_CLIENT_SECRET: ${BLING_CLIENT_SECRET}
+      BLING_REDIRECT_URI: http://localhost:3001/auth/bling/callback
     depends_on:
       mongodb:
         condition: service_healthy

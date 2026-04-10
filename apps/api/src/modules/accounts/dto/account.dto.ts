@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateAccountDto {
   @IsString()
@@ -6,8 +6,8 @@ export class CreateAccountDto {
   name: string;
 
   @IsString()
-  @IsNotEmpty()
-  apiKey: string;
+  @IsOptional()
+  apiKey?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -26,4 +26,24 @@ export class UpdateAccountDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @IsString()
+  @IsOptional()
+  accessToken?: string;
+
+  @IsString()
+  @IsOptional()
+  refreshToken?: string;
+
+  @IsString()
+  @IsOptional()
+  tokenExpiresAt?: Date;
+
+  @IsNumber()
+  @IsOptional()
+  blingCompanyId?: number;
+
+  @IsString()
+  @IsOptional()
+  authType?: 'api_key' | 'oauth';
 }

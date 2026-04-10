@@ -2,16 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/lib/api';
-import { Plus, Store, Key, RefreshCw, Trash2 } from 'lucide-react';
+import { Plus, Store, Key, RefreshCw, Trash2, Link2, CheckCircle2, XCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface Account {
   id: string;
   name: string;
-  apiKey: string;
+  apiKey: string | null;
   webhookToken: string;
   storeId: string;
   isActive: boolean;
+  accessToken: string | null;
+  refreshToken: string | null;
+  tokenExpiresAt: string | null;
+  blingCompanyId: number | null;
+  authType: 'api_key' | 'oauth';
 }
 
 interface StoreData {
@@ -24,6 +29,8 @@ export default function AccountsPage() {
   const [stores, setStores] = useState<StoreData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showWebhookModal, setShowWebhookModal] = useState<string | null>(null);
+  const [webhookUrl, setWebhookUrl] = useState('');
   const [formData, setFormData] = useState({ name: '', apiKey: '', storeId: '' });
 
   useEffect(() => {
@@ -58,6 +65,31 @@ export default function AccountsPage() {
       fetchData();
     } catch (error) {
       console.error('Failed to create account:', error);
+    }
+  }
+
+  async function handleConnectOAuth(accountId: string) {
+    try {
+      const { url } = await apiClient<{ url: string }>('/auth/bling', {
+        method: 'GET',
+        query: { accountId },
+      });
+      window.location.href = url;
+    } catch (error) {
+      console.error('Failed to start OAuth:', error);
+    }
+  }
+
+  async function handleShowWebhookUrl(accountId: string) {
+    try {
+      const { url } = await apiClient<{ url: string }>('/auth/bling/webhook-url', {
+        method: 'GET',
+        query: { accountId },
+      });
+      setWebhookUrl(url);
+      setShowWebhookModal(accountId);
+    } catch (error) {
+      console.error('Failed to get webhook URL:', error);
     }
   }
 
@@ -99,6 +131,11 @@ export default function AccountsPage() {
     }
   }
 
+  function copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text);
+    alert('URL copiada para a área de transferência!');
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -127,6 +164,8 @@ export default function AccountsPage() {
         <div className="space-y-4">
           {accounts.map((account) => {
             const store = stores.find((s) => s.id === account.storeId);
+            const isConnected = account.authType === 'oauth' && account.accessToken;
+            
             return (
               <div
                 key={account.id}
@@ -149,20 +188,45 @@ export default function AccountsPage() {
                       >
                         {account.isActive ? 'Ativo' : 'Inativo'}
                       </span>
+                      {isConnected ? (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                          <CheckCircle2 size={12} />
+                          OAuth Conectado
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
+                          <XCircle size={12} />
+                          API Key
+                        </span>
+                      )}
                     </div>
                     {store && (
                       <p className="text-sm text-gray-500 mt-1">
                         Loja: {store.name}
                       </p>
                     )}
-                    <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                        <Key size={14} />
-                        <span>Webhook Token:</span>
-                      </div>
-                      <code className="text-xs font-mono break-all">{account.webhookToken}</code>
+                    
+                    <div className="flex gap-4 mt-4">
+                      <button
+                        onClick={() => handleShowWebhookUrl(account.id)}
+                        className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                      >
+                        <Link2 size={16} />
+                        Ver URL do Webhook
+                      </button>
+                      
+                      {!isConnected && (
+                        <button
+                          onClick={() => handleConnectOAuth(account.id)}
+                          className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          <Link2 size={16} />
+                          Conectar com OAuth
+                        </button>
+                      )}
                     </div>
                   </div>
+                  
                   <div className="flex items-center gap-2 ml-4">
                     <button
                       onClick={() => handleRegenerateToken(account.id)}
@@ -216,14 +280,13 @@ export default function AccountsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  API Key
+                  API Key (opcional - use OAuth para conectar)
                 </label>
                 <input
                   type="text"
                   value={formData.apiKey}
                   onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                  required
                 />
               </div>
               <div>
@@ -260,6 +323,34 @@ export default function AccountsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showWebhookModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-lg">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">URL do Webhook</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Configure esta URL no painel do Bling para receber notificações de pedidos.
+            </p>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <code className="text-sm font-mono break-all">{webhookUrl}</code>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => copyToClipboard(webhookUrl)}
+                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              >
+                Copiar URL
+              </button>
+              <button
+                onClick={() => setShowWebhookModal(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Fechar
+              </button>
+            </div>
           </div>
         </div>
       )}

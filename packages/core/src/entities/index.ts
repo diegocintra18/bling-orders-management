@@ -16,10 +16,15 @@ export enum UserRole {
 export interface Account {
   id: string;
   name: string;
-  apiKey: string;
+  apiKey: string | null;
   webhookToken: string;
   storeId: string;
   isActive: boolean;
+  accessToken: string | null;
+  refreshToken: string | null;
+  tokenExpiresAt: Date | null;
+  blingCompanyId: number | null;
+  authType: 'api_key' | 'oauth';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,6 +54,19 @@ export interface Order {
   dataDespacho: Date | null;
   trackingCode: string | null;
   syncStatus: SyncStatus;
+  dataFaturamento: Date | null;
+  dataEmbalamento: Date | null;
+  dataUltimaAtualizacaoStatus: Date | null;
+  notaFiscal: {
+    numero: string;
+    serie: string;
+    chaveAcesso?: string | null;
+    dataEmissao?: string | null;
+  } | null;
+  blingSituacaoOriginal: {
+    id: number;
+    nome: string;
+  } | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -56,6 +74,8 @@ export interface Order {
 export enum OrderStatus {
   PENDENTE = 'pendente',
   PAGO = 'pago',
+  FATURADO = 'faturado',
+  EMBALADO = 'embalado',
   SEPARADO = 'separado',
   DESPACHADO = 'despachado',
   ENTREGUE = 'entregue',

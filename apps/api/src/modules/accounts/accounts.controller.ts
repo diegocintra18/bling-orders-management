@@ -29,7 +29,12 @@ export class AccountsController {
   }
 
   @Post()
-  async create(@Body() dto: CreateAccountDto) {
+  async create(@Body() body: any) {
+    const dto: CreateAccountDto = {
+      name: body?.Name || body?.name,
+      apiKey: body?.apiKey || body?.ApiKey,
+      storeId: body?.storeId || body?.StoreId,
+    };
     return this.accountsService.create(dto);
   }
 

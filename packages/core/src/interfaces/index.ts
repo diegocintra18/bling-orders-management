@@ -70,14 +70,36 @@ export interface IBlingClient {
   validateWebhook(data: unknown, token: string): boolean;
 }
 
+export interface BlingSituacao {
+  id: number;
+  nome?: string;
+  valor?: number;
+}
+
+export interface BlingNotaFiscal {
+  numero: string;
+  serie: string;
+  chaveAcesso?: string;
+  dataEmissao?: string;
+}
+
+export interface BlingLoja {
+  id: number;
+  descricao?: string;
+  unidadeNegocio?: {
+    id: number;
+    descricao?: string;
+  };
+}
+
 export interface BlingOrderResponse {
   id: number;
   numero: string;
-  situacao: string;
+  situacao: BlingSituacao;
   cliente: {
     nome: string;
-    telefone?: string;
-    email?: string;
+    telefone?: string | null;
+    email?: string | null;
   };
   itens: Array<{
     codigo: string;
@@ -90,13 +112,17 @@ export interface BlingOrderResponse {
   dataPrevista?: string;
   dataSaida?: string;
   codigosRastreamento?: string[];
+  notaFiscal?: BlingNotaFiscal | null;
+  loja?: BlingLoja | null;
 }
 
 export interface BlingOrdersParams {
   dataEmissao?: { inicio: string; fim: string };
-  situacao?: number;
+  dataAlteracao?: { inicio: string; fim: string };
+  idsSituacoes?: number[];
   pagina?: number;
   limite?: number;
+  idLoja?: number;
 }
 
 export interface BlingOrdersResponse {

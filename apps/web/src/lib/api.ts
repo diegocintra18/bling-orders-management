@@ -4,13 +4,24 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 interface FetchOptions extends RequestInit {
   authenticated?: boolean;
+  query?: Record<string, string>;
 }
 
 export async function apiClient<T>(
   endpoint: string,
   options: FetchOptions = {},
 ): Promise<T> {
-  const { authenticated = true, ...fetchOptions } = options;
+  const { authenticated = true, query, ...fetchOptions } = options;
+
+  let url = `${API_URL}${endpoint}`;
+  
+  if (query) {
+    const searchParams = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      searchParams.append(key, value);
+    });
+    url += `?${searchParams.toString()}`;
+  }
 
   let headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -27,7 +38,7 @@ export async function apiClient<T>(
     }
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const response = await fetch(url, {
     ...fetchOptions,
     headers,
   });

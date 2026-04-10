@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { OrderDocument } from '../../common/schemas';
 import { createBlingClient } from '@bling-orders/infra';
-import type { IBlingClient, BlingOrderResponse } from '@bling-orders/infra';
+import type { IBlingClient, BlingOrderResponse, BlingSituacao } from '@bling-orders/infra';
 import type { OrderItem } from '@bling-orders/core';
 
 @Injectable()
@@ -15,11 +15,11 @@ export class BlingSyncService {
   ) {}
 
   async syncAccountOrders(
-    apiKey: string,
+    accessToken: string,
     accountId: string,
     storeId: string,
   ): Promise<void> {
-    const blingClient: IBlingClient = createBlingClient(apiKey);
+    const blingClient: IBlingClient = createBlingClient(accessToken);
 
     let page = 1;
     let hasMore = true;
@@ -51,18 +51,31 @@ export class BlingSyncService {
     storeId: string,
     data: BlingOrderResponse,
   ): Promise<void> {
+    const statusInfo = this.mapStatus(data.situacao);
+
     const existingOrder = await this.orderModel.findOne({
       externalOrderId: data.id,
       accountId,
     }).exec();
 
     if (existingOrder) {
-      existingOrder.status = this.mapStatus(data.situacao);
+      const oldStatus = existingOrder.status;
+      existingOrder.status = statusInfo.status;
       existingOrder.dataDespacho = data.dataSaida
         ? new Date(data.dataSaida)
         : existingOrder.dataDespacho;
       existingOrder.trackingCode = data.codigosRastreamento?.[0] || existingOrder.trackingCode;
       existingOrder.syncStatus = 'synced';
+
+      if (oldStatus !== statusInfo.status) {
+        existingOrder.dataUltimaAtualizacaoStatus = new Date();
+        if (statusInfo.dataFaturamento && !existingOrder.dataFaturamento) {
+          existingOrder.dataFaturamento = statusInfo.dataFaturamento;
+        }
+        if (statusInfo.dataEmbalamento && !existingOrder.dataEmbalamento) {
+          existingOrder.dataEmbalamento = statusInfo.dataEmbalamento;
+        }
+      }
 
       await existingOrder.save();
     } else {
@@ -71,7 +84,7 @@ export class BlingSyncService {
         accountId,
         storeId,
         numero: data.numero,
-        status: this.mapStatus(data.situacao),
+        status: statusInfo.status,
         isPicked: false,
         isDelayed: false,
         cliente: {
@@ -91,6 +104,14 @@ export class BlingSyncService {
         dataDespacho: data.dataSaida ? new Date(data.dataSaida) : null,
         trackingCode: data.codigosRastreamento?.[0] || null,
         syncStatus: 'synced',
+        dataFaturamento: statusInfo.dataFaturamento,
+        dataEmbalamento: statusInfo.dataEmbalamento,
+        dataUltimaAtualizacaoStatus: new Date(),
+        notaFiscal: data.notaFiscal || null,
+        blingSituacaoOriginal: {
+          id: data.situacao?.id || 0,
+          nome: data.situacao?.nome || '',
+        },
       });
 
       await newOrder.save();
@@ -104,7 +125,30 @@ export class BlingSyncService {
     }
   }
 
-  private mapStatus(blingStatus: string): string {
+  private mapStatus(situacao: BlingSituacao | string): {
+    status: string;
+    dataFaturamento: Date | null;
+    dataEmbalamento: Date | null;
+  } {
+    const situacaoNome = typeof situacao === 'string' ? situacao : situacao?.nome || '';
+    const now = new Date();
+
+    if (situacaoNome === 'Faturado' || situacaoNome === 'Nota Fiscal Gerada') {
+      return {
+        status: 'faturado',
+        dataFaturamento: now,
+        dataEmbalamento: null,
+      };
+    }
+
+    if (situacaoNome === 'Embalado' || situacaoNome === 'Verificado') {
+      return {
+        status: 'embalado',
+        dataFaturamento: null,
+        dataEmbalamento: now,
+      };
+    }
+
     const statusMap: Record<string, string> = {
       'Aguardando Pagamento': 'pendente',
       'Pago': 'pago',
@@ -114,6 +158,10 @@ export class BlingSyncService {
       'Entregue': 'entregue',
     };
 
-    return statusMap[blingStatus] || 'pendente';
+    return {
+      status: statusMap[situacaoNome] || 'pendente',
+      dataFaturamento: null,
+      dataEmbalamento: null,
+    };
   }
 }
