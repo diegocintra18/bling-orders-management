@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@bling-orders/core": "*",
     "axios": "^1.6.0",
     "mongoose": "^8.0.0",
     "bcryptjs": "^2.4.3",
